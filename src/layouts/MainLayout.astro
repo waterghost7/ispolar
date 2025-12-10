@@ -1,0 +1,107 @@
+---
+// src/layouts/MainLayout.astro
+// Burası sunucu tarafında çalışan JavaScript alanıdır (Frontmatter)
+const { title, description } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-5B35M5FSQB"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-5B35M5FSQB');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>{title} | IsPolar?</title>
+    <meta name="description" content={description || "Instant molecule polarity checker."}>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧪</text></svg>">
+</head>
+<body>
+
+    <button id="themeToggle" class="theme-btn" aria-label="Toggle Dark Mode">🌙</button>
+
+    <slot />
+
+    <style is:global>
+        /* Senin CSS Kodların Buraya Gelecek */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --text-dark: #1f2937;
+            --text-gray: #6b7280;
+            --border-color: rgba(0,0,0,0.05);
+            --input-bg: #f9fafb;
+            --sidebar-width: 350px;
+            --shadow-soft: 0 10px 40px -10px rgba(99, 102, 241, 0.15);
+        }
+
+        body.dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-dark: #f1f5f9;
+            --text-gray: #94a3b8;
+            --border-color: #334155;
+            --input-bg: #0f172a;
+            --shadow-soft: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            height: 100vh;
+            background-color: var(--bg-body);
+            color: var(--text-dark);
+            overflow: hidden; 
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Dark Mode Butonu */
+        .theme-btn {
+            position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px;
+            border-radius: 50%; border: none; background: var(--bg-card); color: var(--text-dark);
+            font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 2000; display: flex; align-items: center; justify-content: center;
+            transition: transform 0.2s, background-color 0.3s;
+        }
+        .theme-btn:hover { transform: scale(1.1); }
+    </style>
+
+    <script is:inline>
+        // Dark Mode Mantığı
+        const themeBtn = document.getElementById('themeToggle');
+        const currentTheme = localStorage.getItem('theme');
+        
+        if (currentTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            if(themeBtn) themeBtn.textContent = '☀️';
+        }
+
+        if(themeBtn) {
+            themeBtn.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                if (document.body.classList.contains('dark-mode')) {
+                    localStorage.setItem('theme', 'dark');
+                    themeBtn.textContent = '☀️';
+                } else {
+                    localStorage.setItem('theme', 'light');
+                    themeBtn.textContent = '🌙';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
