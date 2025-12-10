@@ -1,24 +1,26 @@
 ---
 // src/pages/[...slug].astro
-import { molecules } from '../moleculesData.js'; // Veriyi src'den çekiyoruz
+import { molecules } from '../moleculesData.js';
+// Eğer bir React/Vue componentin varsa onu import et (Örnek: MainApp)
+// import MainApp from '../components/MainApp.jsx'; 
 
-// BU FONKSİYON SİHİRİ YAPIYOR:
-// Astro'ya diyoruz ki: "Listemdeki her molekül için ve anasayfa için birer sayfa üret."
 export async function getStaticPaths() {
-  // 1. Her molekül için bir rota oluştur (/h2o, /co2...)
+  // 1. Her molekül için rota oluştururken VERİYİ DE (props) paketleyip gönderiyoruz.
   const moleculeRoutes = molecules.map(mol => ({
     params: { slug: mol.id },
+    props: { molecule: mol }, // <--- SİHİRLİ KISIM BURASI: Veriyi sayfaya taşıyoruz
   }));
 
-  // 2. Bir de boş rota oluştur (Anasayfa / için)
+  // 2. Anasayfa için (Veri yok, null gönderiyoruz)
   return [
-    { params: { slug: undefined } }, 
+    { params: { slug: undefined }, props: { molecule: null } }, 
     ...moleculeRoutes
   ];
 }
 
-// Şu anki sayfanın hangisi olduğunu anla
+// Artık sadece slug'ı değil, yukarıda paketlediğimiz 'molecule' verisini de karşılıyoruz.
 const { slug } = Astro.params;
+const { molecule } = Astro.props;
 ---
 
 <!DOCTYPE html>
