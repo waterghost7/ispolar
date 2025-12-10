@@ -34,7 +34,6 @@ const { title, description } = Astro.props;
     <slot />
 
     <style is:global>
-        /* Senin CSS Kodların Buraya Gelecek */
         :root {
             --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
             --bg-body: #f3f4f6;
@@ -45,6 +44,8 @@ const { title, description } = Astro.props;
             --input-bg: #f9fafb;
             --sidebar-width: 350px;
             --shadow-soft: 0 10px 40px -10px rgba(99, 102, 241, 0.15);
+            --scroll-thumb: #cbd5e1;
+            --scroll-track: #f3f4f6;
         }
 
         body.dark-mode {
@@ -55,17 +56,31 @@ const { title, description } = Astro.props;
             --border-color: #334155;
             --input-bg: #0f172a;
             --shadow-soft: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+            --scroll-thumb: #475569;
+            --scroll-track: #0f172a;
+            color-scheme: dark;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+        /* HTML ve BODY ayarları (Scroll sorununu çözen kısım) */
+        html {
+            height: 100%;
+            overflow-x: hidden; /* Yatay kaymayı engelle */
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
-            display: flex;
-            height: 100vh;
             background-color: var(--bg-body);
             color: var(--text-dark);
-            overflow: hidden; 
+            
+            /* ÖNEMLİ DEĞİŞİKLİKLER BURADA: */
+            width: 100%;
+            min-height: 100%; /* vh yerine % kullanmak mobilde daha güvenlidir */
+            position: relative;
+            overflow-x: hidden;
+            /* overflow-y: auto;  <-- BU SATIRI SİLDİK (Doğal scroll çalışsın diye) */
+            
             transition: background-color 0.3s, color 0.3s;
         }
 

@@ -44,176 +44,221 @@ const { slug } = Astro.params;
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧪</text></svg>">
 
-<style is:global>
-        /* 1. TEMEL AYARLAR VE RESET */
-        :root {
-            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            --bg-body: #f3f4f6;
-            --bg-card: #ffffff;
-            --text-dark: #1f2937;
-            --text-gray: #6b7280;
-            --border-color: rgba(0,0,0,0.05);
-            --input-bg: #f9fafb;
-            --sidebar-width: 350px;
-            --shadow-soft: 0 10px 40px -10px rgba(99, 102, 241, 0.15);
-        }
-
-        body.dark-mode {
-            --bg-body: #0f172a;
-            --bg-card: #1e293b;
-            --text-dark: #f1f5f9;
-            --text-gray: #94a3b8;
-            --border-color: #334155;
-            --input-bg: #0f172a;
-            --shadow-soft: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
-        }
-
-        /* Tüm elementlerin kutu modelini düzelt */
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* HTML ve BODY'nin tam ekran olmasını sağla */
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden; /* Sayfa kaymasını engeller, sadece içerik kayar */
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            display: flex; /* Yan yana dizilim */
-            flex-direction: row; /* Sidebar solda, içerik sağda */
-            background-color: var(--bg-body);
-            color: var(--text-dark);
-        }
-
-        /* DARK MODE BUTONU */
-        .theme-btn {
-            position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px;
-            border-radius: 50%; border: none; background: var(--bg-card); color: var(--text-dark);
-            font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 2000; display: flex; align-items: center; justify-content: center;
-            transition: transform 0.2s, background-color 0.3s;
-        }
-        .theme-btn:hover { transform: scale(1.1); }
-
-        /* MOBİL NAVİGASYON (Varsayılan gizli) */
-        .mobile-nav {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 60px;
-            background: var(--bg-card); z-index: 500; padding: 0 20px;
-            align-items: center; justify-content: space-between;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        .hamburger-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-dark); padding: 5px; }
-        .mobile-logo { font-weight: 700; font-size: 1.2rem; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-        /* SIDEBAR (SOL PANEL) */
-        .sidebar {
-            width: var(--sidebar-width);
-            min-width: var(--sidebar-width); /* Küçülmesini engelle */
-            background: var(--bg-card);
-            border-right: 1px solid var(--border-color);
-            display: flex; flex-direction: column;
-            height: 100%; /* Tam boy */
-            z-index: 1000;
-            position: relative;
-            box-shadow: 5px 0 25px rgba(0,0,0,0.03);
-            transition: transform 0.3s ease;
-        }
-
-        .search-wrapper { padding: 20px 25px; background: var(--bg-card); position: sticky; top: 0; z-index: 50; }
-        .search-container { position: relative; width: 100%; }
-        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; border: 2px solid #9ca3af; border-radius: 50%; }
-        .search-icon::after { content: ''; position: absolute; right: -5px; bottom: -5px; width: 6px; height: 2px; background: #9ca3af; transform: rotate(45deg); }
-        
-        .search-wrapper input {
-            width: 100%; padding: 14px 20px 14px 45px; border-radius: 50px;
-            border: 2px solid var(--bg-body); background: var(--input-bg);
-            font-size: 15px; font-weight: 500; color: var(--text-dark); outline: none; transition: all 0.3s ease;
-        }
-        .search-wrapper input:focus { background: var(--bg-card); border-color: #818cf8; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.15); }
-
-        .molecule-list { flex: 1; overflow-y: auto; padding: 10px 15px 40px 15px; }
-
-        /* MOLECULE ITEM */
-        .molecule-item {
-            padding: 16px 20px; margin-bottom: 8px; border-radius: 12px; cursor: pointer;
-            display: flex; justify-content: space-between; align-items: center;
-            transition: all 0.2s; border: 1px solid transparent;
-        }
-        .molecule-item:hover { background-color: var(--bg-body); transform: translateX(5px); }
-        .molecule-item.active { background: var(--primary-gradient); color: white; box-shadow: 0 8px 20px -5px rgba(99, 102, 241, 0.4); }
-        .molecule-item span.formula { font-weight: 700; font-size: 1.1rem; color: var(--text-dark); }
-        .molecule-item.active span.formula { color: white; }
-        .molecule-item span.name { font-size: 0.85rem; color: var(--text-gray); font-weight: 500;}
-        .molecule-item.active span.name { color: rgba(255,255,255,0.8); }
-
-        /* ANA İÇERİK (SAĞ TARAF) */
-        .main-content {
-            flex: 1; /* Kalan boşluğu doldur */
-            height: 100%; /* Tam boy */
-            overflow-y: auto; /* Kendi içinde kaydırılsın */
-            padding: 40px;
-            display: flex; flex-direction: column; align-items: center;
-        }
-
-        .card {
-            background: var(--bg-card); width: 100%; max-width: 800px; min-height: 600px;
-            border-radius: 24px; box-shadow: var(--shadow-soft); padding: 40px;
-            border: 1px solid var(--border-color); margin-bottom: 50px; transition: background-color 0.3s;
-        }
-
-        /* RESİM KAPLAYICI */
-        .image-container {
-            width: 100%; height: 320px;
-            background: var(--bg-body); border-radius: 20px;
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 30px; border: 2px dashed var(--border-color);
-            position: relative; overflow: hidden;
-        }
-        .image-container img { max-width: 90%; max-height: 90%; object-fit: contain; }
-
-        /* SEO FOOTER */
-        .seo-footer {
-            width: 100%; max-width: 800px; background: var(--bg-card); padding: 25px;
-            border-radius: 16px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.03); margin-top: auto;
-        }
-        .seo-table { width: 100%; margin-top: 15px; border-collapse: collapse; text-align: left; }
-        .seo-table th { color: #8b5cf6; font-size: 0.8rem; padding: 10px; }
-        .seo-table td { font-size: 0.9rem; padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--text-dark); }
-
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 900; opacity: 0; transition: opacity 0.3s; }
-        .overlay.active { display: block; opacity: 1; }
-
-        /* MOBİL UYUMLULUK (Responsive) */
-        @media (max-width: 768px) {
-            body { 
-                flex-direction: column; /* Mobilde alt alta olsun */
-                height: auto; 
-                padding-top: 60px; /* Header boşluğu */
-                overflow: auto; /* Ana scroll mobilde açık */
+    <style is:global>
+            /* 1. RESET VE DEĞİŞKENLER */
+            :root {
+                --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+                --bg-body: #f3f4f6;
+                --bg-card: #ffffff;
+                --text-dark: #1f2937;
+                --text-gray: #6b7280;
+                --border-color: rgba(0,0,0,0.05);
+                --input-bg: #f9fafb;
+                --sidebar-width: 350px;
+                --shadow-soft: 0 10px 40px -10px rgba(99, 102, 241, 0.15);
+                --scroll-thumb: #cbd5e1;
+                --scroll-track: #f3f4f6;
             }
+
+            body.dark-mode {
+                --bg-body: #0f172a;
+                --bg-card: #1e293b;
+                --text-dark: #f1f5f9;
+                --text-gray: #94a3b8;
+                --border-color: #334155;
+                --input-bg: #0f172a;
+                --shadow-soft: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+                --scroll-thumb: #475569;
+                --scroll-track: #0f172a;
+                color-scheme: dark;
+            }
+
+            *, *::before, *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            /* 2. TEMEL YAPI (HERKES İÇİN ORTAK) */
+            html {
+                width: 100%;
+                /* DİKKAT: Burada height: 100% veya overflow: hidden YOK. */
+            }
+
+            body {
+                font-family: 'Poppins', sans-serif;
+                background-color: var(--bg-body);
+                color: var(--text-dark);
+                width: 100%;
+                /* Flex özellikleri aşağıda sadece masaüstüne verilecek */
+            }
+
+            /* =========================================
+            MASAÜSTÜ GÖRÜNÜMÜ (769px ve üstü)
+            Sayfa kilitleme (overflow: hidden) SADECE BURADA
+            ========================================= */
+            @media (min-width: 769px) {
+                html, body {
+                    height: 100%;
+                    overflow: hidden; /* Sadece PC'de kilitli */
+                }
+
+                body {
+                    display: flex;
+                    flex-direction: row;
+                }
+
+                .sidebar {
+                    height: 100%;
+                    overflow: hidden;
+                    display: flex; 
+                    flex-direction: column;
+                }
+
+                .main-content {
+                    height: 100%;
+                    overflow-y: auto; /* İçerik burada kayar */
+                }
+            }
+
+            /* =========================================
+            MOBİL GÖRÜNÜMÜ (768px ve altı)
+            Burada her şey doğal akışına bırakıldı.
+            ========================================= */
+            @media (max-width: 768px) {
+                html, body {
+                    height: auto;
+                    min-height: 100vh;
+                    overflow-x: hidden;
+                    overflow-y: auto; /* Mobilde ana scroll serbest */
+                }
+
+                body {
+                    display: block;
+                    padding-top: 60px;
+                    position: relative;
+                }
+
+                .main-content {
+                    height: auto;
+                    overflow: visible; /* İç kilit yok */
+                    display: block;
+                }
+            }
+
+            /* --- BİLEŞENLER --- */
             
-            .mobile-nav { display: flex; } /* Menü açılır */
-
-            .sidebar {
-                position: fixed; top: 0; left: 0; height: 100%; width: 80%; max-width: 320px;
-                transform: translateX(-100%); /* Gizli */
-                box-shadow: 5px 0 30px rgba(0,0,0,0.2);
+            /* DARK MODE BUTONU */
+            .theme-btn {
+                position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px;
+                border-radius: 50%; border: none; background: var(--bg-card); color: var(--text-dark);
+                font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                z-index: 2000; display: flex; align-items: center; justify-content: center;
+                transition: transform 0.2s, background-color 0.3s;
             }
-            .sidebar.open { transform: translateX(0); } /* Açık */
+            .theme-btn:hover { transform: scale(1.1); }
 
-            .search-wrapper { border-radius: 0; }
-            .molecule-list { padding-bottom: 80px; }
-            .main-content { padding: 20px 15px; width: 100%; }
-            .card { padding: 25px; border-radius: 20px; }
-            .seo-table { display: none; }
-        }
-    </style>
+            /* SIDEBAR GENEL */
+            .sidebar {
+                width: var(--sidebar-width);
+                min-width: var(--sidebar-width);
+                background: var(--bg-card);
+                border-right: 1px solid var(--border-color);
+                z-index: 1000;
+                position: relative;
+                box-shadow: 5px 0 25px rgba(0,0,0,0.03);
+                transition: transform 0.3s ease;
+            }
+
+            /* SEARCH INPUT */
+            .search-wrapper { padding: 20px 25px; background: var(--bg-card); position: sticky; top: 0; z-index: 50; }
+            .search-container { position: relative; width: 100%; }
+            .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; border: 2px solid #9ca3af; border-radius: 50%; }
+            .search-icon::after { content: ''; position: absolute; right: -5px; bottom: -5px; width: 6px; height: 2px; background: #9ca3af; transform: rotate(45deg); }
+            
+            .search-wrapper input {
+                width: 100%; padding: 14px 20px 14px 45px; border-radius: 50px;
+                border: 2px solid var(--bg-body); background: var(--input-bg);
+                font-size: 15px; font-weight: 500; color: var(--text-dark); outline: none; transition: all 0.3s ease;
+            }
+            .search-wrapper input:focus { background: var(--bg-card); border-color: #818cf8; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.15); }
+
+            .molecule-list { flex: 1; overflow-y: auto; padding: 10px 15px 40px 15px; }
+
+            /* MOLECULE ITEM */
+            :global(.molecule-item) { padding: 16px 20px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; border: 1px solid transparent; }
+            :global(.molecule-item:hover) { background-color: var(--bg-body); transform: translateX(5px); }
+            :global(.molecule-item.active) { background: var(--primary-gradient); color: white; box-shadow: 0 8px 20px -5px rgba(99, 102, 241, 0.4); }
+            :global(.molecule-item span.formula) { font-weight: 700; font-size: 1.1rem; color: var(--text-dark); }
+            :global(.molecule-item.active span.formula) { color: white; }
+            :global(.molecule-item span.name) { font-size: 0.85rem; color: var(--text-gray); font-weight: 500;}
+            :global(.molecule-item.active span.name) { color: rgba(255,255,255,0.8); }
+
+            /* ANA İÇERİK */
+            .main-content {
+                flex: 1;
+                padding: 40px;
+                display: flex; flex-direction: column; align-items: center;
+            }
+
+            .card {
+                background: var(--bg-card); width: 100%; max-width: 800px; min-height: 600px;
+                border-radius: 24px; box-shadow: var(--shadow-soft); padding: 40px;
+                border: 1px solid var(--border-color); margin-bottom: 50px; transition: background-color 0.3s;
+            }
+
+            .image-container {
+                width: 100%; height: 320px;
+                background: var(--bg-body); border-radius: 20px;
+                display: flex; align-items: center; justify-content: center;
+                margin-bottom: 30px; border: 2px dashed var(--border-color);
+                position: relative; overflow: hidden;
+            }
+            .image-container img { max-width: 90%; max-height: 90%; object-fit: contain; }
+
+            .seo-footer {
+                width: 100%; max-width: 800px; background: var(--bg-card); padding: 25px;
+                border-radius: 16px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.03); margin-top: auto;
+            }
+            .seo-table { width: 100%; margin-top: 15px; border-collapse: collapse; text-align: left; }
+            .seo-table th { color: #8b5cf6; font-size: 0.8rem; padding: 10px; }
+            .seo-table td { font-size: 0.9rem; padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--text-dark); }
+
+            .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 900; opacity: 0; transition: opacity 0.3s; }
+            .overlay.active { display: block; opacity: 1; }
+
+            /* SCROLLBAR */
+            ::-webkit-scrollbar { width: 8px; }
+            ::-webkit-scrollbar-track { background: var(--scroll-track); }
+            ::-webkit-scrollbar-thumb { background-color: var(--scroll-thumb); border-radius: 20px; }
+            html { scrollbar-width: thin; scrollbar-color: var(--scroll-thumb) var(--scroll-track); }
+
+            /* MOBİL ÖZEL AYARLAR (NAVBAR VB.) */
+            @media (max-width: 768px) {
+                .mobile-nav { 
+                    display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+                    background: var(--bg-card); z-index: 500; padding: 0 20px;
+                    align-items: center; justify-content: space-between;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                }
+                .hamburger-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-dark); padding: 5px; }
+                .mobile-logo { font-weight: 700; font-size: 1.2rem; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+                .sidebar {
+                    position: fixed; top: 0; left: 0; height: 100%; width: 80%; max-width: 320px;
+                    transform: translateX(-100%);
+                    box-shadow: 5px 0 30px rgba(0,0,0,0.2);
+                }
+                .sidebar.open { transform: translateX(0); }
+
+                .search-wrapper { border-radius: 0; }
+                .molecule-list { padding-bottom: 80px; }
+                .main-content { padding: 20px 15px; }
+                .card { padding: 25px; border-radius: 20px; min-height: auto; }
+                .seo-table { display: none; }
+            }
+        </style>
 </head>
 <body>
 
